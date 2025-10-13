@@ -15,39 +15,27 @@ void setup() {
   Wire.begin(SDA_PIN, SCL_PIN, 100000);
   Wire.setTimeout(2500); // increase timeout to avoid error 263
 
-  Serial.println("initializing apds9960");
+  Serial.println("Initializing apds9960");
 
   if (apds.init()) {
-    Serial.println("it works");
+    Serial.println("Initialized!");
   } else {
-    Serial.println("nope");
+    Serial.println("Fail to initialize apds9960");
     while (1);
   }
-
-  
-
-  // gesture recognition
-  if (apds.enableGestureSensor(true)) {
-    Serial.println("running");
-  } else {
-    Serial.println("failed");
-  }
+  apds.enableProximitySensor(true);
+  apds.enableLightSensor(true);
 }
 
 void loop() {
-  if (apds.isGestureAvailable()) {
-    int gesture = apds.readGesture();
+  uint8_t proximity = 0;
+  apds.readProximity(proximity);
+  
+  uint16_t r = 0, g = 0, b = 0;
+  apds.readRedLight(r);
+  apds.readGreenLight(g);
+  apds.readBlueLight(b);
+  Serial.printf("Proximity: %d | RGB: %d, %d, %d\n", proximity, r, g, b);
 
-    switch (gesture) {
-      case DIR_UP:    Serial.println("UP"); break;
-      case DIR_DOWN:  Serial.println("DOWN"); break;
-      case DIR_LEFT:  Serial.println("LEFT"); break;
-      case DIR_RIGHT: Serial.println("RIGHT"); break;
-      case DIR_NEAR:  Serial.println("NEAR"); break;
-      case DIR_FAR:   Serial.println("FAR"); break;
-      default:        Serial.println("NONE");
-    }
-  }
-
-  delay(150); // slow loop avoids I2C timeouts
+  delay(150);
 }
